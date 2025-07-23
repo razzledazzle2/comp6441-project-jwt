@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "PORT=5174 react-scripts start"
+    "start": "PORT=5173 react-scripts start"
 
   },
   "dependencies": {

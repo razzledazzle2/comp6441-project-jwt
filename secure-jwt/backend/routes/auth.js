@@ -4,7 +4,26 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const router = express.Router();
-const SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access_secret";
+const REFRESH_TOKEN_SECRET =
+  process.env.REFRESH_TOKEN_SECRET || "refresh_secret";
+
+// Store refresh tokens in memory (in production, use Redis or database)
+let refreshTokens = [];
+
+// Generate tokens
+const generateAccessToken = (user) => {
+  return jwt.sign({ id: user.id, email: user.email }, ACCESS_TOKEN_SECRET, {
+    expiresIn: "15m", // Short-lived access token
+  });
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign({ id: user.id, email: user.email }, REFRESH_TOKEN_SECRET, {
+    expiresIn: "7d", // Long-lived refresh token
+  });
+};
 
 // Register
 router.post("/register", async (req, res) => {
@@ -39,19 +58,23 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
-      expiresIn: "24h",
-    });
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    res.cookie("access_token", token, {
+    // Store refresh token
+    refreshTokens.push(refreshToken);
+
+    // Set refresh token as httpOnly cookie
+    res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: true, // set true in production with HTTPS
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.json({
       message: "Login successful",
+      accessToken,
       user: { id: user.id, email: user.email },
     });
   } catch (err) {
@@ -60,27 +83,62 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Refresh token endpoint
+router.post("/refresh", (req, res) => {
+  const refreshToken = req.cookies?.refresh_token;
+
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Refresh token not found" });
+  }
+
+  if (!refreshTokens.includes(refreshToken)) {
+    return res.status(403).json({ error: "Invalid refresh token" });
+  }
+
+  try {
+    const user = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+    const newAccessToken = generateAccessToken(user);
+
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid refresh token" });
+  }
+});
+
 // Logout
 router.post("/logout", (req, res) => {
-  res.clearCookie("access_token");
+  const refreshToken = req.cookies?.refresh_token;
+
+  // Remove refresh token from storage
+  refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+
+  res.clearCookie("refresh_token");
   res.json({ message: "Logged out successfully" });
 });
 
-function authenticateToken(req, res, next) {
-  const token = req.cookies?.access_token;
-  if (!token) return res.status(401).json({ error: "Not authenticated" });
+// Middleware to authenticate access token
+function authenticateAccessToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: "Access token required" });
+  }
 
   try {
-    const user = jwt.verify(token, SECRET);
-    req.user = user; // attach user info to request
+    const user = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    req.user = user;
     next();
-  } catch {
-    res.status(403).json({ error: "Invalid token" });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Access token expired" });
+    }
+    return res.status(403).json({ error: "Invalid access token" });
   }
 }
 
-// Check auth status - protected route 
-router.get("/me", authenticateToken, (req, res) => {
+// Protected route
+router.get("/me", authenticateAccessToken, (req, res) => {
   res.json({ user: req.user });
 });
 
