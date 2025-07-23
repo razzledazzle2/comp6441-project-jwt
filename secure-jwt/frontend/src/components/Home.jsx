@@ -1,6 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button, Paper } from "@mui/material";
+import { authService } from "../utils/auth";
 
 export const Home = () => {
   const [user, setUser] = useState(null);
@@ -13,15 +16,12 @@ export const Home = () => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch("http://localhost:4000/me", {
-        credentials: "include",
-      });
+      const response = await authService.apiCall("http://localhost:4000/me");
 
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
       } else {
-        // Not authenticated, redirect to login
         navigate("/login");
       }
     } catch (error) {
@@ -38,10 +38,11 @@ export const Home = () => {
         method: "POST",
         credentials: "include",
       });
+      authService.logout();
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Force redirect even if logout request fails
+      authService.logout();
       navigate("/login");
     }
   };

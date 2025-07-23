@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Input, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -32,7 +34,7 @@ export const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Important for cookies
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -43,6 +45,9 @@ export const Login = () => {
         setLoading(false);
         return;
       }
+
+      // Store access token
+      localStorage.setItem("accessToken", data.accessToken);
 
       // Navigate to home page after successful login
       navigate("/home");
