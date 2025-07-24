@@ -15,13 +15,13 @@ let refreshTokens = [];
 // Generate tokens
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user.id, email: user.email }, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m", // Short-lived access token
+    expiresIn: "5m", // Short-lived access token
   });
 };
 
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user.id, email: user.email }, REFRESH_TOKEN_SECRET, {
-    expiresIn: "7d", // Long-lived refresh token
+    expiresIn: "30d", // Long-lived refresh token
   });
 };
 

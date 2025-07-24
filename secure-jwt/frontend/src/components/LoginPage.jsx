@@ -3,6 +3,7 @@
 import { Box, Input, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { authService } from "../utils/auth";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -46,8 +47,8 @@ export const Login = () => {
         return;
       }
 
-      // Store access token
-      localStorage.setItem("accessToken", data.accessToken);
+      // Store access token in memory only
+      authService.setAccessToken(data.accessToken);
 
       // Navigate to home page after successful login
       navigate("/home");
