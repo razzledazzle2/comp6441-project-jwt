@@ -1,18 +1,15 @@
 // Token management utilities
 class AuthService {
   constructor() {
-    this.accessToken = localStorage.getItem("accessToken");
+    // Store access token in memory only 
+    this.accessToken = null;
     this.isRefreshing = false;
     this.failedQueue = [];
   }
 
   setAccessToken(token) {
+    // Only store in memory
     this.accessToken = token;
-    if (token) {
-      localStorage.setItem("accessToken", token);
-    } else {
-      localStorage.removeItem("accessToken");
-    }
   }
 
   getAccessToken() {
@@ -87,9 +84,37 @@ class AuthService {
 
     return response;
   }
+
+  async initializeAuth() {
+    try {
+      const response = await fetch("http://localhost:4000/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.setAccessToken(data.accessToken);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to initialize auth:", error);
+      return false;
+    }
+  }
+
   logout() {
     this.setAccessToken(null);
-    // Redirect will be handled by the component
+    // Clear any pending requests
+
+    this.failedQueue = [];
+    this.isRefreshing = false;
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return !!this.accessToken;
   }
 }
 

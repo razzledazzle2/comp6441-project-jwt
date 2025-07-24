@@ -9,11 +9,17 @@ export const ProtectedRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
+    initializeAndCheckAuth();
   }, []);
 
-  const checkAuth = async () => {
+  const initializeAndCheckAuth = async () => {
     try {
+      // First, try to get a fresh access token using refresh token
+      if (!authService.isAuthenticated()) {
+        await authService.initializeAuth();
+      }
+
+      // Then check if we can access protected resources
       const response = await authService.apiCall("http://localhost:4000/me");
 
       if (response.ok) {
@@ -39,7 +45,6 @@ export const ProtectedRoute = ({ children }) => {
           height: "100vh",
         }}
       >
-        Loading...
       </div>
     );
   }
