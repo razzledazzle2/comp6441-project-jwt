@@ -1,7 +1,7 @@
 // Token management utilities
 class AuthService {
   constructor() {
-    // Store access token in memory only 
+    // Store access token in memory only
     this.accessToken = null;
     this.isRefreshing = false;
     this.failedQueue = [];
@@ -13,7 +13,7 @@ class AuthService {
   }
 
   getAccessToken() {
-    return this.accessToken || localStorage.getItem("accessToken");
+    return this.accessToken;
   }
 
   async refreshToken() {
